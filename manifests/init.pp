@@ -348,9 +348,8 @@ class heartbeat (
   }
 
   ### Managed resources
-  package { 'heartbeat':
+  package { $heartbeat::package:
     ensure => $heartbeat::manage_package,
-    name   => $heartbeat::package,
   }
 
   service { 'heartbeat':
@@ -359,7 +358,7 @@ class heartbeat (
     enable     => $heartbeat::manage_service_enable,
     hasstatus  => $heartbeat::service_status,
     pattern    => $heartbeat::process,
-    require    => Package['heartbeat'],
+    require    => Package[$heartbeat::package],
   }
 
   file { 'heartbeat.conf':
@@ -368,7 +367,7 @@ class heartbeat (
     mode    => $heartbeat::config_file_mode,
     owner   => $heartbeat::config_file_owner,
     group   => $heartbeat::config_file_group,
-    require => Package['heartbeat'],
+    require => Package[$heartbeat::package],
     notify  => $heartbeat::manage_service_autorestart,
     source  => $heartbeat::manage_file_source,
     content => $heartbeat::manage_file_content,
@@ -383,7 +382,7 @@ class heartbeat (
       mode    => $heartbeat::config_file_mode,
       owner   => $heartbeat::config_file_owner,
       group   => $heartbeat::config_file_group,
-      require => Package['heartbeat'],
+      require => Package[$heartbeat::package],
       notify  => $heartbeat::manage_service_autorestart,
       source  => $heartbeat::source_haresources,,
       replace => $heartbeat::manage_file_replace,
@@ -398,7 +397,7 @@ class heartbeat (
       mode    => '0600',
       owner   => $heartbeat::config_file_owner,
       group   => $heartbeat::config_file_group,
-      require => Package['heartbeat'],
+      require => Package[$heartbeat::package],
       notify  => $heartbeat::manage_service_autorestart,
       source  => $heartbeat::source_authkeys,
       replace => $heartbeat::manage_file_replace,
@@ -411,7 +410,7 @@ class heartbeat (
     file { 'heartbeat.dir':
       ensure  => directory,
       path    => $heartbeat::config_dir,
-      require => Package['heartbeat'],
+      require => Package[$heartbeat::package],
       notify  => $heartbeat::manage_service_autorestart,
       source  => $heartbeat::source_dir,
       recurse => true,
@@ -441,27 +440,30 @@ class heartbeat (
 
   ### Service monitoring, if enabled ( monitor => true )
   if $heartbeat::bool_monitor == true {
-    monitor::port { "heartbeat_${heartbeat::protocol}_${heartbeat::port}":
-      protocol => $heartbeat::protocol,
-      port     => $heartbeat::port,
-      target   => $heartbeat::monitor_target,
-      tool     => $heartbeat::monitor_tool,
-      enable   => $heartbeat::manage_monitor,
+    if $heartbeat::port != '' {
+      monitor::port { "heartbeat_${heartbeat::protocol}_${heartbeat::port}":
+        protocol => $heartbeat::protocol,
+        port     => $heartbeat::port,
+        target   => $heartbeat::monitor_target,
+        tool     => $heartbeat::monitor_tool,
+        enable   => $heartbeat::manage_monitor,
+      }
     }
-    monitor::process { 'heartbeat_process':
-      process  => $heartbeat::process,
-      service  => $heartbeat::service,
-      pidfile  => $heartbeat::pid_file,
-      user     => $heartbeat::process_user,
-      argument => $heartbeat::process_args,
-      tool     => $heartbeat::monitor_tool,
-      enable   => $heartbeat::manage_monitor,
+    if $heartbeat::service != '' {
+      monitor::process { 'heartbeat_process':
+        process  => $heartbeat::process,
+        service  => $heartbeat::service,
+        pidfile  => $heartbeat::pid_file,
+        user     => $heartbeat::process_user,
+        argument => $heartbeat::process_args,
+        tool     => $heartbeat::monitor_tool,
+        enable   => $heartbeat::manage_monitor,
+      }
     }
   }
 
-
   ### Firewall management, if enabled ( firewall => true )
-  if $heartbeat::bool_firewall == true {
+  if $heartbeat::bool_firewall == true and $heartbeat::port != '' {
     firewall { "heartbeat_${heartbeat::protocol}_${heartbeat::port}":
       source      => $heartbeat::firewall_src,
       destination => $heartbeat::firewall_dst,
