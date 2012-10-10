@@ -14,7 +14,7 @@
 #
 class heartbeat::params {
 
-  $config_file_resources = $::operatingsystem ? {
+  $config_file_haresources = $::operatingsystem ? {
     default => '/etc/ha.d/haresources',
   }
 
@@ -22,8 +22,11 @@ class heartbeat::params {
     default => '/etc/ha.d/authkeys',
   }
 
-  $source_resources = ''
+  $source_haresources = ''
   $source_authkeys = ''
+  $template_haresources = ''
+  $template_authkeys = ''
+
 
   ### Application related parameters
 

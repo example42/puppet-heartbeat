@@ -19,9 +19,25 @@ For detailed info about the logic and usage patterns of Example42 modules check 
 * Install heartbeat with custom source files for ha.cf haresources and authkeys
 
         class { 'heartbeat':
-          source            => 'puppet:///modules/example42/heartbeat/ha.cf',
-          haresource_source => 'puppet:///modules/example42/heartbeat/haresources',
-          authkeys_source   => 'puppet:///modules/example42/heartbeat/authkeys',
+          source             => 'puppet:///modules/example42/heartbeat/ha.cf',
+          source_haresources => 'puppet:///modules/example42/heartbeat/haresources',
+          source_authkeys    => 'puppet:///modules/example42/heartbeat/authkeys',
+        }
+
+* Install heartbeat with custom templates for ha.cf haresources and authkeys
+
+        class { 'heartbeat':
+          template             => 'example42/heartbeat/ha.cf',
+          template_haresources => 'example42/heartbeat/haresources',
+          template_authkeys    => 'example42/heartbeat/authkeys',
+        }
+
+* Install heartbeat with custom source files for ha.cf and authkeys and template for haresources
+
+        class { 'heartbeat':
+          source               => 'puppet:///modules/example42/heartbeat/ha.cf',
+          template_haresources => 'example42/heartbeat/haresources',
+          source_authkeys      => 'puppet:///modules/example42/heartbeat/authkeys',
         }
 
 

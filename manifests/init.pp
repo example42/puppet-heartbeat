@@ -6,17 +6,25 @@
 # == Parameters
 # Module's specific variables
 #
-# [*config_file_resources*]
+# [*config_file_haresources*]
 #   Path of of haresources file
 #
-# [*source_resources*]
+# [*source_haresources*]
 #   Custom source file for the haresources file
+#
+# [*template_haresources*]
+#   Custom template file for the haresources file
+#   Note: source_haresources and template_haresources are alternative
 #
 # [*config_file_authkeys*]
 #   Path of of authkeys file
 #
 # [*source_authkeys*]
 #   Custom source file for the authkeys file
+#
+# [*template_authkeys*]
+#   Custom template file for the authkeys file
+#   Note: source_authkeys and template_authkeys are alternative
 #
 # Standard class parameters
 # Define the general class behaviour and customizations
@@ -218,10 +226,12 @@
 #   Alessandro Franceschi <al@lab42.it/>
 #
 class heartbeat (
-  $config_file_resources = params_lookup( 'config_file_resources' ),
-  $source_resources      = params_lookup( 'source_resource' ),
-  $config_file_authkeys  = params_lookup( 'config_file_authkeys' ),
-  $source_authkeys       = params_lookup( 'source_authkeys' ),
+  $config_file_haresources = params_lookup( 'config_file_haresources' ),
+  $source_haresources      = params_lookup( 'source_haresources' ),
+  $template_haresources    = params_lookup( 'template_haresources' ),
+  $config_file_authkeys    = params_lookup( 'config_file_authkeys' ),
+  $source_authkeys         = params_lookup( 'source_authkeys' ),
+  $template_authkeys       = params_lookup( 'template_authkeys' ),
   $my_class            = params_lookup( 'my_class' ),
   $my_class            = params_lookup( 'my_class' ),
   $my_class            = params_lookup( 'my_class' ),
@@ -347,6 +357,27 @@ class heartbeat (
     default   => template($heartbeat::template),
   }
 
+  $manage_file_source_haresources = $heartbeat::source_haresources ? {
+    ''        => undef,
+    default   => $heartbeat::source_haresources,
+  }
+
+  $manage_file_content_haresources = $heartbeat::template_haresources ? {
+    ''        => undef,
+    default   => template($heartbeat::template_haresources),
+  }
+
+  $manage_file_source_authkeys = $heartbeat::source_authkeys ? {
+    ''        => undef,
+    default   => $heartbeat::source_authkeys,
+  }
+
+  $manage_file_content_authkeys = $heartbeat::template_authkeys ? {
+    ''        => undef,
+    default   => template($heartbeat::template_authkeys),
+  }
+
+
   ### Managed resources
   package { $heartbeat::package:
     ensure => $heartbeat::manage_package,
@@ -375,7 +406,8 @@ class heartbeat (
     audit   => $heartbeat::manage_audit,
   }
 
-  if $heartbeat::source_haresources {
+  if $heartbeat::source_haresources
+  or $heartbeat::template_haresources {
     file { 'haresources':
       ensure  => $heartbeat::manage_file,
       path    => $heartbeat::config_file_haresources,
@@ -384,13 +416,15 @@ class heartbeat (
       group   => $heartbeat::config_file_group,
       require => Package[$heartbeat::package],
       notify  => $heartbeat::manage_service_autorestart,
-      source  => $heartbeat::source_haresources,,
+      source  => $heartbeat::manage_file_source_haresources,
+      content => $heartbeat::manage_file_content_haresources,
       replace => $heartbeat::manage_file_replace,
       audit   => $heartbeat::manage_audit,
     }
   }
 
-  if $heartbeat::source_authkeys {
+  if $heartbeat::source_authkeys
+  or $heartbeat::template_authkeys {
     file { 'authkeys':
       ensure  => $heartbeat::manage_file,
       path    => $heartbeat::config_file_authkeys,
@@ -399,7 +433,8 @@ class heartbeat (
       group   => $heartbeat::config_file_group,
       require => Package[$heartbeat::package],
       notify  => $heartbeat::manage_service_autorestart,
-      source  => $heartbeat::source_authkeys,
+      source  => $heartbeat::manage_file_source_authkeys,
+      content => $heartbeat::manage_file_content_authkeys,
       replace => $heartbeat::manage_file_replace,
       audit   => $heartbeat::manage_audit,
     }
