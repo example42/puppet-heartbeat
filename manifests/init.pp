@@ -233,8 +233,6 @@ class heartbeat (
   $source_authkeys         = params_lookup( 'source_authkeys' ),
   $template_authkeys       = params_lookup( 'template_authkeys' ),
   $my_class            = params_lookup( 'my_class' ),
-  $my_class            = params_lookup( 'my_class' ),
-  $my_class            = params_lookup( 'my_class' ),
   $source              = params_lookup( 'source' ),
   $source_dir          = params_lookup( 'source_dir' ),
   $source_dir_purge    = params_lookup( 'source_dir_purge' ),
