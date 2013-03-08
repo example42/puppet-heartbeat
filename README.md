@@ -130,3 +130,5 @@ For detailed info about the logic and usage patterns of Example42 modules check 
           firewall_dst  => $ipaddress_eth0,
         }
 
+
+[![Build Status](https://travis-ci.org/example42/puppet-heartbeat.png?branch=master)](https://travis-ci.org/example42/puppet-heartbeat)
